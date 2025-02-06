@@ -1,10 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 function App() {
   const [length, setLength] = useState(8);
   const [numberAllowed, setNumberAllowed] = useState(false);
   const [characterAllowed, setCharacterAllowed] = useState(false);
   const [password, setPassword] = useState("");
+
+  //useRef hook
+  const passwordRef = useRef(null);
 
   const passwordGenerator = useCallback(() => {
     let pass = "";
@@ -20,21 +23,35 @@ function App() {
     setPassword(pass);
   }, [length, numberAllowed, characterAllowed, setPassword]);
 
+  const copyPasswordToClipboard = useCallback(() => {
+    passwordRef.current?.select();
+    passwordRef.current?.setSelectionRange(0, 101);
+    window.navigator.clipboard.writeText(password);
+  }, [password]);
+
+  useEffect(() => {
+    passwordGenerator();
+  }, [length, numberAllowed, characterAllowed, passwordGenerator]);
+
   return (
     <>
-      <div className="w-full max-w-md mx-auto shadow-md rounded-lg px-4 py-2 my-8 bg-gray-800 text-orange-500">
+      <div className="w-full max-w-2xl mx-auto shadow-md rounded-lg px-4 py-2 my-8 bg-gray-800 text-orange-500">
         <h1 className="text-white text-center my-3">Password Generator</h1>
 
         <div className="flex shadow rounded-lg overflow-hidden mb-4 bg-white">
           <input
             type="text"
             value={password}
-            className="outline-none w-full py-1 px-3 text-gray-400 "
+            className="outline-none w-full py-1 px-3  "
             placeholder="password"
             readOnly
+            ref={passwordRef}
           />
-          <button className="outline-none bg-blue-700 text-white px-3 py-0.5 shrink-0">
-            copy
+          <button
+            onClick={copyPasswordToClipboard}
+            className="outline-none bg-blue-700 text-white px-3 py-0.5 shrink-0 cursor-pointer"
+          >
+            Copy
           </button>
         </div>
 
@@ -72,7 +89,7 @@ function App() {
                 setCharacterAllowed((prev) => !prev);
               }}
             />
-            <label htmlFor="characterInput">Characters</label>
+            <label htmlFor="characterInput">Special Characters</label>
           </div>
         </div>
       </div>
